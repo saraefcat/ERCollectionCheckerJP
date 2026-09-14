@@ -1,0 +1,18 @@
+[Bb]in/
+[Oo]bj/
+.vs/
+.idea/
+TestResults/
+artifacts/
+/data/
+tools/.cache/
+*.user
+*.suo
+*.nupkg
+
+# Never commit user saves or original game archives/binaries.
+*.sl2
+*.bhd
+*.bdt
+regulation.bin
+oo2core*_win64.dll

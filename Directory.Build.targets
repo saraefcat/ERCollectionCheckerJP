@@ -1,0 +1,25 @@
+<Project>
+  <Target Name="ValidatePrivateRuntimeData"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(RequiresPrivateRuntimeData)' == 'true'">
+    <Error Condition="!Exists('$(ERCollectionCheckerJPRuntimeDataRoot)\reviewed-item-database\manifest.json')"
+           Text="Private Runtime data is not available. Set ERCollectionCheckerJPPrivateDataRoot to the private data directory before building this project." />
+    <Error Condition="!Exists('$(ERCollectionCheckerJPRuntimeDataRoot)\tarnished-pack\manifest.json')"
+           Text="Private Runtime data is incomplete: tarnished-pack manifest is missing." />
+    <Error Condition="!Exists('$(ERCollectionCheckerJPRuntimeDataRoot)\armor-conversions\manifest.json')"
+           Text="Private Runtime data is incomplete: armor-conversions manifest is missing." />
+    <Error Condition="!Exists('$(ERCollectionCheckerJPRuntimeDataRoot)\gesture-mappings\manifest.json')"
+           Text="Private Runtime data is incomplete: gesture-mappings manifest is missing." />
+    <Error Condition="!Exists('$(ERCollectionCheckerJPRuntimeDataRoot)\goods-classifications\manifest.json')"
+           Text="Private Runtime data is incomplete: goods-classifications manifest is missing." />
+  </Target>
+
+  <Target Name="ValidatePrivateRegressionData"
+          BeforeTargets="PrepareForBuild"
+          Condition="'$(RequiresPrivateRegressionData)' == 'true'">
+    <Error Condition="!Exists('$(ERCollectionCheckerJPPrivateDataRoot)\1.17\curation\tarnished-pack-flags.json')"
+           Text="Private regression data is not available. Set ERCollectionCheckerJPPrivateDataRoot to the private data directory before building this test project." />
+    <Error Condition="!Exists('$(ERCollectionCheckerJPPrivateDataRoot)\1.17\fragments')"
+           Text="Private regression fragment data is not available." />
+  </Target>
+</Project>
