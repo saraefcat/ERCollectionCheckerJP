@@ -208,7 +208,8 @@ ja/en 名称、weapon canonical alias、霊馬装束 rule fragment は存在す�
 
 非公開Runtime rootには現行製品scopeの5 packを確定した。各packは独立manifestを保ち、Applicationが
 全manifest、payload、version、fingerprint、相互参照を検証してから単一Catalogへ合成する。残るGoods 828件の
-永続source分類と統合schemaは未完了のため、引き続き一般向けの「1.17 DB 完成」とは扱わない。
+永続source分類と統合schemaは未完了のため、「1.17の全アイテムを永続取得判定できるDB」とは扱わない。
+現在のCollection/Strict scopeと分類保留を明示したうえで、一般向けreleaseに利用する。
 
 reviewed databaseの軽量Runtime packは取得可能2,768件とDataOnly 599件をloadでき、
 既存Tarnished Pack overlayとの合成境界を実装した。overlayとidentity・日英名称・content pack・aliasを照合し、

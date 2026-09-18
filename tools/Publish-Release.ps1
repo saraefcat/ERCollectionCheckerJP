@@ -17,6 +17,12 @@ $stagingDirectory = [IO.Path]::GetFullPath(
     (Join-Path $releaseRoot ".$packageName.$([Guid]::NewGuid().ToString('N')).staging"))
 $solutionPath = Join-Path $repositoryRoot 'ERCollectionCheckerJP.sln'
 $applicationProject = Join-Path $repositoryRoot 'src\ERCollectionCheckerJP.App\ERCollectionCheckerJP.App.csproj'
+$privateDataRoot = if ([string]::IsNullOrWhiteSpace($env:ERCollectionCheckerJPPrivateDataRoot)) {
+    Join-Path $workspaceRoot 'data'
+} else {
+    [IO.Path]::GetFullPath($env:ERCollectionCheckerJPPrivateDataRoot)
+}
+$runtimeDataRoot = Join-Path $privateDataRoot '1.17\runtime'
 $dotnetExecutable = (Get-Command dotnet -ErrorAction Stop).Source
 $dotnetRoot = Split-Path -Parent $dotnetExecutable
 $dotnetLicensePath = Join-Path $dotnetRoot 'LICENSE.txt'
@@ -129,12 +135,50 @@ try {
         "$sourceCommit`r`n",
         $utf8WithoutBom)
 
+    $runtimeFiles = @(Get-ChildItem -LiteralPath $runtimeDataRoot -Recurse -File -Filter '*.json' |
+        Sort-Object FullName)
+    if ($runtimeFiles.Count -ne 16) {
+        throw "Expected 16 Runtime JSON files, found $($runtimeFiles.Count)."
+    }
+
+    $runtimeFingerprintInput = ($runtimeFiles | ForEach-Object {
+        $relativePath = $_.FullName.Substring($runtimeDataRoot.Length + 1).Replace('\', '/')
+        $hash = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash
+        "$relativePath=$hash"
+    }) -join "`n"
+    $runtimeFingerprint = [Convert]::ToHexString(
+        [Security.Cryptography.SHA256]::HashData(
+            $utf8WithoutBom.GetBytes($runtimeFingerprintInput)))
+    $dotnetSdkVersion = (& dotnet --version).Trim()
+    $depsPath = Join-Path $repositoryRoot (
+        'src\ERCollectionCheckerJP.App\obj\Release\net10.0-windows\win-x64\' +
+        'ERCollectionCheckerJP.deps.json')
+    $deps = Get-Content -Raw -LiteralPath $depsPath | ConvertFrom-Json -AsHashtable
+    $runtimePackKeys = @($deps.libraries.Keys | Where-Object {
+        $_ -like 'runtimepack.Microsoft.NETCore.App.Runtime.win-x64/*'
+    })
+    if ($runtimePackKeys.Count -ne 1) {
+        throw "Expected one .NET Runtime pack entry, found $($runtimePackKeys.Count)."
+    }
+    $dotnetRuntimeVersion = $runtimePackKeys[0].Split('/')[-1]
+    [IO.File]::WriteAllLines(
+        (Join-Path $stagingDirectory 'RUNTIME_DATA.txt'),
+        @(
+            'GameVersion=1.17',
+            "FileCount=$($runtimeFiles.Count)",
+            "AggregateSHA256=$runtimeFingerprint",
+            "DotNetSDK=$dotnetSdkVersion",
+            "DotNetRuntime=$dotnetRuntimeVersion"
+        ),
+        $utf8WithoutBom)
+
     $requiredFiles = @(
-        'ERCollectionCheckerJP.App.exe',
+        'ERCollectionCheckerJP.exe',
         'DOTNET_LICENSE.txt',
         'DOTNET_THIRD_PARTY_NOTICES.txt',
         'LICENSE',
         'README.md',
+        'RUNTIME_DATA.txt',
         'SOURCE_COMMIT.txt',
         'THIRD_PARTY_NOTICES.md'
     )

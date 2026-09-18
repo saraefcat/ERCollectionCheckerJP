@@ -23,6 +23,7 @@ goods-classifications/
 `RuntimeCatalogSnapshot`を返す。部分Catalogや前回版との暗黙混在は返さない。
 
 WPFは埋め込んだ16ファイルを起動時だけ非表示の一時rootへ展開し、snapshotを1回構築後に削除する。
+異常終了で残ったGUID名の一時rootは、並行起動を妨げないよう24時間経過後の次回起動時に削除する。
 Application統合テストは同じ16ファイルをテスト出力へコピーしてloader契約を検証する。
 構築した`SaveAnalysisService`をMainWindowへ渡し、配布フォルダには個別JSONを置かない。
 

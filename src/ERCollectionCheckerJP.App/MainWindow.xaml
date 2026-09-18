@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
         Title="{Binding WindowTitle}"
-        Icon="/ERCollectionCheckerJP.App;component/Assets/ERCollectionCheckerJP.ico"
+        Icon="/ERCollectionCheckerJP;component/Assets/ERCollectionCheckerJP.ico"
         Width="1440" Height="900" MinWidth="1120" MinHeight="720"
         Background="#0B0F14" Foreground="#E8EDF3"
         WindowStartupLocation="CenterScreen">

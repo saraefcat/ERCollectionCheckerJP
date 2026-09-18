@@ -6,6 +6,7 @@ internal sealed class EmbeddedRuntimeData : IAsyncDisposable
 {
     private const string ResourcePrefix = "ERCollectionCheckerJP.RuntimeData/";
     private const int ExpectedJsonFileCount = 16;
+    private static readonly TimeSpan StaleDirectoryAge = TimeSpan.FromHours(24);
 
     private EmbeddedRuntimeData(string rootDirectory)
     {
@@ -34,12 +35,16 @@ internal sealed class EmbeddedRuntimeData : IAsyncDisposable
             Path.GetTempPath(),
             "ERCollectionCheckerJP",
             "runtime");
+        Directory.CreateDirectory(parentDirectory);
+        TryHideDirectory(parentDirectory);
+        CleanupStaleDirectories(
+            parentDirectory,
+            DateTimeOffset.UtcNow.Subtract(StaleDirectoryAge));
         var rootDirectory = Path.Combine(parentDirectory, Guid.NewGuid().ToString("N"));
 
         try
         {
             Directory.CreateDirectory(rootDirectory);
-            TryHideDirectory(parentDirectory);
 
             foreach (var resourceName in resourceNames)
             {
@@ -121,6 +126,49 @@ internal sealed class EmbeddedRuntimeData : IAsyncDisposable
             exception is IOException or UnauthorizedAccessException or ArgumentException)
         {
             // Hiding is cosmetic. Extraction and cleanup remain mandatory.
+        }
+    }
+
+    internal static void CleanupStaleDirectories(
+        string parentDirectory,
+        DateTimeOffset cutoffUtc)
+    {
+        try
+        {
+            if (!Directory.Exists(parentDirectory))
+            {
+                return;
+            }
+
+            foreach (var directory in Directory.EnumerateDirectories(parentDirectory))
+            {
+                var name = Path.GetFileName(directory);
+                if (!Guid.TryParseExact(name, "N", out _))
+                {
+                    continue;
+                }
+
+                DateTimeOffset lastWriteUtc;
+                try
+                {
+                    lastWriteUtc = Directory.GetLastWriteTimeUtc(directory);
+                }
+                catch (Exception exception) when (
+                    exception is IOException or UnauthorizedAccessException or ArgumentException)
+                {
+                    continue;
+                }
+
+                if (lastWriteUtc <= cutoffUtc)
+                {
+                    TryDeleteDirectory(directory);
+                }
+            }
+        }
+        catch (Exception exception) when (
+            exception is IOException or UnauthorizedAccessException or ArgumentException)
+        {
+            // Cleanup is best effort and must not prevent the app from starting.
         }
     }
 

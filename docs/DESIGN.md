@@ -346,4 +346,5 @@ unit、integration、1.17 regression、実セーブ確認を分ける。fixture 
 | export / watcher | 未実装 | Phase 6 で実装 |
 
 非公開データ領域の`1.17/fragments/`は回帰用の移行中データであり、完成データパックではない。
-したがってアプリを「1.17 完全対応」と表示したり、一般向け release を作成したりしない。
+したがってアプリを「1.17の全アイテムを永続取得判定できる」とは表示しない。一般向けreleaseでは、
+Collection 1,940件、Strict 2,768件、分類保留Goods、未実装機能をREADMEとリリースノートへ明記する。

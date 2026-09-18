@@ -35,6 +35,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
     <ApplicationIcon>Assets\ERCollectionCheckerJP.ico</ApplicationIcon>
+    <AssemblyName>ERCollectionCheckerJP</AssemblyName>
+    <Product>ER Collection Checker JP</Product>
     <RequiresPrivateRuntimeData>true</RequiresPrivateRuntimeData>
     <Authors>ER Collection Checker JP contributors</Authors>
     <Description>PC版ELDEN RINGのセーブデータからアイテム収集状況を表示します。</Description>

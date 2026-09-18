@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  public-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Test public-data projects
+        shell: pwsh
+        run: |
+          dotnet test tests/ERCollectionCheckerJP.Domain.Tests/ERCollectionCheckerJP.Domain.Tests.csproj -c Release
+          dotnet test tests/ERCollectionCheckerJP.SaveParser.Tests/ERCollectionCheckerJP.SaveParser.Tests.csproj -c Release
+          dotnet test tests/ERCollectionCheckerJP.SaveDiagnostics.Tests/ERCollectionCheckerJP.SaveDiagnostics.Tests.csproj -c Release

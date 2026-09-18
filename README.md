@@ -5,8 +5,8 @@ PC Steam版『ELDEN RING』のセーブデータを読み取り専用で解析�
 Windowsデスクトップアプリです。
 
 > [!IMPORTANT]
-> 現在は開発中です。ゲームバージョン1.17向けの解析・画面・データベースは動作しますが、
-> 一般利用者向けの正式リリースはまだ作成していません。
+> 対応するのはPC Steam版・ゲームバージョン1.17です。異なるバージョンのセーブデータは
+> 正しく解析できない可能性があります。使用前にセーブデータをバックアップしてください。
 
 ## 主な機能
 
@@ -44,9 +44,17 @@ Windowsデスクトップアプリです。
 - ゲームバージョン1.17
 
 一般利用者向け配布物は.NET 10 Desktop Runtimeを同梱した自己完結型です。.NETの別途インストールは
-必要ありません。ZIPを任意のフォルダへ展開し、`ERCollectionCheckerJP.App.exe`を起動します。
+必要ありません。ZIPを任意のフォルダへ展開し、`ERCollectionCheckerJP.exe`を起動します。
+
+現在の配布物はコード署名されていません。Windowsが発行元の警告を表示する場合があります。
+配布ページに掲載されたSHA-256と、同梱の`SHA256SUMS.txt`を確認してから使用してください。
 
 ## ソースから起動する
+
+> [!NOTE]
+> 公開リポジトリにはゲーム由来のRuntimeデータを含めていません。そのため、クローンした
+> 公開ソースだけでは完全なアプリをビルドできません。以下は非公開Runtimeデータを正規の位置へ
+> 配置した保守者向けの手順です。
 
 ```powershell
 dotnet restore ERCollectionCheckerJP.sln
@@ -102,7 +110,8 @@ Goodsも含むため、より広い確認向けのモードです。
 - CSV / JSON exportは未実装
 - キャラクターのレベル、プレイ時間、周回数表示は未実装
 - 一部Goodsは永続的な取得済み判定方法を確認できるまで、コレクション対象で分類保留
-- インストーラー、コード署名、一般利用者向けリリースパッケージは未作成
+- インストーラーは提供せず、自己完結型ZIPで配布
+- 実行ファイルはコード署名なし
 
 未解析または確認不足の情報は、未所持ではなく`未判定`として扱います。
 
@@ -111,6 +120,13 @@ Goodsも含むため、より広い確認向けのモードです。
 ```powershell
 dotnet build ERCollectionCheckerJP.sln -c Release
 dotnet test ERCollectionCheckerJP.sln -c Release --no-build
+```
+
+カバレッジを取得する場合は、決定的ビルド用のsource path変換を一時的に無効化する次のスクリプトを
+使用します。結果はGit管理外の`TestResults/Coverage/`へ出力されます。
+
+```powershell
+.\tools\Test-WithCoverage.ps1
 ```
 
 通常Solutionには製品コード、自動テスト、読み取り専用の`SaveDiagnostics`を含みます。
@@ -129,6 +145,10 @@ win-x64配布物、ZIP、SHA-256を外側の`artifacts/releases/`へ生成しま
 
 版番号を変更する場合は、例えば`.\tools\Publish-Release.ps1 -Version 0.1.0`と指定します。
 配布物の`SOURCE_COMMIT.txt`には発行元コミットが記録されます。
+`RUNTIME_DATA.txt`にはゲームバージョン、Runtimeファイル数、内容を識別する集約SHA-256、
+使用した.NET SDKと同梱.NET Runtimeのバージョンが記録されます。生のRuntime JSONやゲームファイルは
+含みません。
+公開手順と確認事項は[リリース手順](docs/RELEASE.md)を参照してください。
 
 ## プロジェクト構成
 
@@ -157,7 +177,9 @@ src/
 
 Runtime JSONは実行ファイルへ埋め込み、配布フォルダには個別ファイルとして配置しません。起動時に
 manifest、schema、ファイルサイズ、SHA-256、相互参照を検証してメモリへ読み込んだ後、一時展開物を
-削除します。外部ツールやゲーム原本へのRuntimeアクセスは行いません。
+削除します。異常終了時に残ったアプリ専用の一時ディレクトリは、24時間経過後の次回起動時に削除します。
+外部ツールやゲーム原本へのRuntimeアクセスは行いません。なお、実行ファイルへの埋め込みは配布物を
+見やすくするためのものであり、データを暗号化・秘匿する仕組みではありません。
 
 ## 開発資料
 
@@ -172,6 +194,9 @@ manifest、schema、ファイルサイズ、SHA-256、相互参照を検証し�
 - [Goods分類](docs/GOODS_CLASSIFICATIONS.md)
 - [第三者通知](docs/THIRD_PARTY_NOTICES.md)
 - [アプリ資産の来歴](docs/ASSET_PROVENANCE.md)
+- [リリース手順](docs/RELEASE.md)
+- [セキュリティ方針](SECURITY.md)
+- [変更履歴](CHANGELOG.md)
 
 ## ライセンスと免責
 

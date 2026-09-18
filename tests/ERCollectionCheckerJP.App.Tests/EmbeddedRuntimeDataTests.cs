@@ -32,4 +32,39 @@ public sealed class EmbeddedRuntimeDataTests
 
         Assert.False(Directory.Exists(root));
     }
+
+    [Fact]
+    public void CleanupStaleDirectories_DeletesOnlyOldGuidDirectories()
+    {
+        var parent = Path.Combine(
+            Path.GetTempPath(),
+            "ERCollectionCheckerJP.Tests",
+            Guid.NewGuid().ToString("N"));
+        var stale = Path.Combine(parent, Guid.NewGuid().ToString("N"));
+        var recent = Path.Combine(parent, Guid.NewGuid().ToString("N"));
+        var unrelated = Path.Combine(parent, "keep-me");
+
+        try
+        {
+            Directory.CreateDirectory(stale);
+            Directory.CreateDirectory(recent);
+            Directory.CreateDirectory(unrelated);
+            Directory.SetLastWriteTimeUtc(stale, DateTime.UtcNow.AddDays(-2));
+
+            EmbeddedRuntimeData.CleanupStaleDirectories(
+                parent,
+                DateTimeOffset.UtcNow.AddDays(-1));
+
+            Assert.False(Directory.Exists(stale));
+            Assert.True(Directory.Exists(recent));
+            Assert.True(Directory.Exists(unrelated));
+        }
+        finally
+        {
+            if (Directory.Exists(parent))
+            {
+                Directory.Delete(parent, recursive: true);
+            }
+        }
+    }
 }

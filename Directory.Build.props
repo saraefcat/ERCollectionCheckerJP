@@ -2,7 +2,7 @@
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <Deterministic>true</Deterministic>
-    <PathMap>$(MSBuildThisFileDirectory)=/_/</PathMap>
+    <PathMap Condition="'$(DisableSourcePathMap)' != 'true'">$(MSBuildThisFileDirectory)=/_/</PathMap>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     <ERCollectionCheckerJPPrivateDataRoot Condition="'$(ERCollectionCheckerJPPrivateDataRoot)' == ''">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\data'))</ERCollectionCheckerJPPrivateDataRoot>
     <ERCollectionCheckerJPRuntimeDataRoot>$([System.IO.Path]::GetFullPath('$(ERCollectionCheckerJPPrivateDataRoot)\1.17\runtime'))</ERCollectionCheckerJPRuntimeDataRoot>
