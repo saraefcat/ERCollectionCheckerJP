@@ -536,10 +536,6 @@ public sealed class MainWindowViewModel : ObservableObject
             if (SetProperty(ref selectedItem, value))
             {
                 copySelectedItemNameCommand.NotifyCanExecuteChanged();
-                if (value is not null)
-                {
-                    CopySelectedItemName();
-                }
             }
         }
     }
@@ -682,8 +678,8 @@ public sealed class MainWindowViewModel : ObservableObject
     public string ItemListLabel => Text("収集アイテム", "Collection items");
 
     public string SortHintText => Text(
-        "レコード選択または Ctrl+C で名称をコピー・列見出しで並べ替え",
-        "Select a row or press Ctrl+C to copy its name · Click a column header to sort");
+        "レコード選択後、ボタンまたは Ctrl+C で名称をコピー・列見出しで並べ替え",
+        "Select a row, then use the button or Ctrl+C to copy its name · Click a column header to sort");
 
     public string CopyNameLabel => Text("名称をコピー", "Copy name");
 

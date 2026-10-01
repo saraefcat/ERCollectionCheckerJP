@@ -242,7 +242,7 @@ public sealed class MainWindowViewModelTests
     }
 
     [Fact]
-    public void SelectingAnItem_CopiesThePrimaryLocalizedName()
+    public void SelectingAnItem_DoesNotWriteToTheClipboardOrUpdateCopyFeedback()
     {
         var clipboard = new StubClipboardService();
         var viewModel = new MainWindowViewModel(
@@ -256,14 +256,75 @@ public sealed class MainWindowViewModelTests
             UiLanguage.Japanese,
             CollectionMode.Collection);
 
-        Assert.Equal("ロングソード", clipboard.LastText);
-        Assert.Equal("「ロングソード」をコピーしました", viewModel.CopyFeedbackText);
+        Assert.Equal(0, clipboard.WriteCount);
+        Assert.Null(clipboard.LastText);
+        Assert.Equal(viewModel.SortHintText, viewModel.CopyFeedbackText);
+    }
 
-        clipboard.LastText = null;
+    [Fact]
+    public void CopyCommand_CopiesThePrimaryLocalizedName()
+    {
+        var clipboard = new StubClipboardService();
+        var viewModel = new MainWindowViewModel(
+            new StubSaveAnalysisService([]),
+            new NullSaveFileDialogService(),
+            new StubUserSettingsService(),
+            clipboard)
+        {
+            SelectedItem = new ItemRowViewModel(
+                Item() with { NameJa = "ロングソード", NameEn = "Longsword" },
+                UiLanguage.Japanese,
+                CollectionMode.Collection),
+        };
+
         Assert.True(viewModel.CopySelectedItemNameCommand.CanExecute(null));
         viewModel.CopySelectedItemNameCommand.Execute(null);
 
+        Assert.Equal(1, clipboard.WriteCount);
         Assert.Equal("ロングソード", clipboard.LastText);
+        Assert.Equal("「ロングソード」をコピーしました", viewModel.CopyFeedbackText);
+    }
+
+    [Fact]
+    public void CopyCommand_IsDisabledWithoutASelection()
+    {
+        var viewModel = new MainWindowViewModel(
+            new StubSaveAnalysisService([]),
+            new NullSaveFileDialogService(),
+            new StubUserSettingsService(),
+            new StubClipboardService());
+
+        Assert.Null(viewModel.SelectedItem);
+        Assert.False(viewModel.CopySelectedItemNameCommand.CanExecute(null));
+    }
+
+    [Fact]
+    public async Task LanguageSwitch_RestoresSelectionWithoutWritingToTheClipboard()
+    {
+        var clipboard = new StubClipboardService();
+        var viewModel = await AnalyzedViewModelAsync(clipboard);
+        viewModel.SelectedItem = Assert.Single(viewModel.Items);
+
+        viewModel.Language = UiLanguage.English;
+
+        Assert.Equal("weapon:1000000", Assert.IsType<ItemRowViewModel>(viewModel.SelectedItem).Source.Key);
+        Assert.Equal("Longsword", viewModel.SelectedItem.PrimaryName);
+        Assert.Equal(0, clipboard.WriteCount);
+        Assert.Null(clipboard.LastText);
+    }
+
+    [Fact]
+    public async Task FilterChange_RestoresSelectionWithoutWritingToTheClipboard()
+    {
+        var clipboard = new StubClipboardService();
+        var viewModel = await AnalyzedViewModelAsync(clipboard);
+        viewModel.SelectedItem = Assert.Single(viewModel.Items);
+
+        viewModel.SelectedCategory = SaveAnalysisCategory.Weapon;
+
+        Assert.Equal("weapon:1000000", Assert.IsType<ItemRowViewModel>(viewModel.SelectedItem).Source.Key);
+        Assert.Equal(0, clipboard.WriteCount);
+        Assert.Null(clipboard.LastText);
     }
 
     [Fact]
@@ -299,6 +360,79 @@ public sealed class MainWindowViewModelTests
     private static RuntimeDataPackPaths RuntimePaths() => RuntimeDataPackPaths.FromRoot(
         Path.Combine(AppContext.BaseDirectory, "data", "1.17", "runtime"));
 
+    private static async Task<MainWindowViewModel> AnalyzedViewModelAsync(
+        StubClipboardService clipboard)
+    {
+        var item = Item() with { NameJa = "ロングソード", NameEn = "Longsword" };
+        var service = new StubSaveAnalysisService(
+            [new SaveSlotDescriptor(0, 261, false, "Test Hero")],
+            Result(item));
+        var viewModel = new MainWindowViewModel(
+            service,
+            new NullSaveFileDialogService(),
+            new StubUserSettingsService(),
+            clipboard)
+        {
+            SavePath = @"C:\fixture\ER0000.sl2",
+        };
+        await viewModel.InitializeAsync();
+
+        var resultPresented = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+        viewModel.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(viewModel.HasResult) && viewModel.HasResult)
+            {
+                resultPresented.TrySetResult(true);
+            }
+        };
+
+        Assert.True(viewModel.AnalyzeCommand.CanExecute(null));
+        viewModel.AnalyzeCommand.Execute(null);
+        await resultPresented.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        return viewModel;
+    }
+
+    private static SaveAnalysisResult Result(params SaveAnalysisItem[] items)
+    {
+        var completion = new CompletionSummary(
+            items.Length,
+            items.Length,
+            0,
+            0,
+            items.Length,
+            0,
+            0,
+            items.Length,
+            0m,
+            100m);
+        return new SaveAnalysisResult(
+            new AnalyzedSaveFile("ER0000.sl2", "TEST", true),
+            0,
+            261,
+            false,
+            new RuntimeDataPackVersions("test", "test", "test", "test", "test"),
+            completion,
+            completion,
+            new CollectionScopeSummary(
+                CollectionMode.Collection,
+                items.Length,
+                items.Length,
+                0,
+                0,
+                100m,
+                completion),
+            new CollectionScopeSummary(
+                CollectionMode.StrictAllItems,
+                items.Length,
+                items.Length,
+                0,
+                0,
+                100m,
+                completion),
+            items);
+    }
+
     private static SaveAnalysisItem Item() => new(
         "weapon:1000000",
         "項目",
@@ -324,7 +458,8 @@ public sealed class MainWindowViewModelTests
     }
 
     private sealed class StubSaveAnalysisService(
-        IReadOnlyList<SaveSlotDescriptor> slots) : ISaveAnalysisService
+        IReadOnlyList<SaveSlotDescriptor> slots,
+        SaveAnalysisResult? result = null) : ISaveAnalysisService
     {
         public Task<IReadOnlyList<SaveSlotDescriptor>> ReadSlotsAsync(
             string savePath,
@@ -332,8 +467,9 @@ public sealed class MainWindowViewModelTests
 
         public Task<SaveAnalysisResult> AnalyzeAsync(
             SaveAnalysisRequest request,
-            CancellationToken cancellationToken = default) =>
-            throw new NotSupportedException();
+            CancellationToken cancellationToken = default) => result is null
+                ? throw new NotSupportedException()
+                : Task.FromResult(result);
     }
 
     private sealed class StubUserSettingsService(
@@ -352,10 +488,13 @@ public sealed class MainWindowViewModelTests
 
     private sealed class StubClipboardService : IClipboardService
     {
-        public string? LastText { get; set; }
+        public int WriteCount { get; private set; }
+
+        public string? LastText { get; private set; }
 
         public bool TrySetText(string text)
         {
+            WriteCount++;
             LastText = text;
             return true;
         }
