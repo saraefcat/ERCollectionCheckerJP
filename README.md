@@ -24,7 +24,7 @@ PC Steam版『ELDEN RING』のセーブデータを解析し、武器、防具�
 - 日本語名・英語名の表示と検索
 - 状態、カテゴリ、Base Game / SHADOW OF THE ERDTREE / Tarnished Packによる絞り込み
 - 列見出しクリックによる一覧の並べ替え
-- 行選択、［名称をコピー］、`Ctrl+C`によるアイテム名のコピー
+- 選択中アイテムの表示言語側の名称を［名称をコピー］または`Ctrl+C`でコピー
 - 防具の直接所持と、別形態から変換できる状態を区別
 - 開発者モードでDataOnly項目、判定メモ、Param ID、内部Keyを確認
 - 最後に正常に読み込んだセーブファイルを次回起動時に復元
@@ -40,10 +40,10 @@ PC Steam版『ELDEN RING』のセーブデータを解析し、武器、防具�
 
 ## ダウンロードと起動
 
-現在の最新版は**v0.1.0**です。
+現在の最新版は**v0.1.1**です。
 
 1. [GitHub Releases](https://github.com/saraefcat/ERCollectionCheckerJP/releases/latest)から
-   `ERCollectionCheckerJP-v0.1.0-win-x64.zip`をダウンロードします。
+   `ERCollectionCheckerJP-v0.1.1-win-x64.zip`をダウンロードします。
 2. ZIPを任意の新しいフォルダーへ完全に展開します。
 3. ZIPビューア内から直接実行せず、展開先の`ERCollectionCheckerJP.exe`を起動します。
 
@@ -58,10 +58,10 @@ GitHub Releasesから入手したファイルであることを確認し、必�
 ZIPを保存したフォルダーでWindows PowerShellを開き、次を実行します。
 
 ```powershell
-Get-FileHash .\ERCollectionCheckerJP-v0.1.0-win-x64.zip -Algorithm SHA256
+Get-FileHash .\ERCollectionCheckerJP-v0.1.1-win-x64.zip -Algorithm SHA256
 ```
 
-表示された`Hash`を、Releaseにある`ERCollectionCheckerJP-v0.1.0-win-x64.zip.sha256.txt`の値と比較してください。
+表示された`Hash`を、Releaseにある`ERCollectionCheckerJP-v0.1.1-win-x64.zip.sha256.txt`の値と比較してください。
 
 ## 基本的な使い方
 
@@ -70,10 +70,10 @@ Get-FileHash .\ERCollectionCheckerJP-v0.1.0-win-x64.zip -Algorithm SHA256
 3. ［収集モード］を選びます。
 4. ［解析］を押します。
 5. 検索、状態、カテゴリ、コンテンツの条件で一覧を絞り込みます。
-6. 行を選択すると、現在の表示言語のアイテム名がクリップボードへコピーされます。
+6. 必要なアイテムの行を選択します。
+7. 名称をコピーする場合は［名称をコピー］を押すか、`Ctrl+C`を使用します。
 
-選択中の名称は［名称をコピー］または`Ctrl+C`でもコピーできます。列見出しをクリックすると一覧を
-並べ替えられます。
+行を選択しただけではクリップボードを書き換えません。列見出しをクリックすると一覧を並べ替えられます。
 
 標準的なセーブファイルの場所は次のとおりです。`<SteamID>`の部分は環境ごとに異なります。
 
@@ -213,7 +213,7 @@ win-x64配布物、ZIP、SHA-256をリリース出力先へ生成します。
 .\tools\Publish-Release.ps1
 ```
 
-版番号を指定する場合は、例えば`.\tools\Publish-Release.ps1 -Version 0.1.0`とします。
+版番号を指定する場合は、例えば`.\tools\Publish-Release.ps1 -Version 0.1.1`とします。
 配布物の`SOURCE_COMMIT.txt`には発行元コミットが、`RUNTIME_DATA.txt`にはゲームバージョン、Runtimeファイル数、
 集約SHA-256、使用した.NET SDKと同梱.NET Runtimeのバージョンが記録されます。生のRuntime JSONやゲームファイルは
 含みません。詳しくは[リリース手順](https://github.com/saraefcat/ERCollectionCheckerJP/blob/main/docs/RELEASE.md)を参照してください。

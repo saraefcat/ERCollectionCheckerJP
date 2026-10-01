@@ -11,7 +11,7 @@
 ## 生成
 
 ```powershell
-.\tools\Publish-Release.ps1 -Version 0.1.0
+.\tools\Publish-Release.ps1 -Version 0.1.1
 ```
 
 スクリプトはrestore、Releaseテスト、自己完結型win-x64 publish、許可ファイル検査、ZIP作成、

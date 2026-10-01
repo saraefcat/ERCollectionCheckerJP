@@ -24,7 +24,7 @@ gestures, Spirit Ashes, Crystal Tears, spectral steed attire, and more.
 - Display and search both Japanese and English item names
 - Filter by status, category, and Base Game / SHADOW OF THE ERDTREE / Tarnished Pack
 - Sort the item list by clicking column headers
-- Copy the displayed-language item name by selecting a row, using **Copy name**, or pressing `Ctrl+C`
+- Copy the selected item's displayed-language name with **Copy name** or `Ctrl+C`
 - Distinguish directly owned armor from forms covered by a verified conversion
 - Inspect DataOnly entries, decision notes, Param IDs, and internal keys in developer mode
 - Restore the last successfully opened save path on the next launch
@@ -40,9 +40,9 @@ See the [WPF UI notes](https://github.com/saraefcat/ERCollectionCheckerJP/blob/m
 
 ## Download and launch
 
-The latest public version is **v0.1.0**.
+The latest public version is **v0.1.1**.
 
-1. Download `ERCollectionCheckerJP-v0.1.0-win-x64.zip` from
+1. Download `ERCollectionCheckerJP-v0.1.1-win-x64.zip` from
    [GitHub Releases](https://github.com/saraefcat/ERCollectionCheckerJP/releases/latest).
 2. Fully extract the ZIP into a new folder of your choice.
 3. Do not run the app from inside a ZIP viewer. Launch `ERCollectionCheckerJP.exe` from the extracted folder.
@@ -58,11 +58,11 @@ came from GitHub Releases and, if desired, verify its SHA-256 checksum as descri
 Open Windows PowerShell in the folder containing the downloaded ZIP and run:
 
 ```powershell
-Get-FileHash .\ERCollectionCheckerJP-v0.1.0-win-x64.zip -Algorithm SHA256
+Get-FileHash .\ERCollectionCheckerJP-v0.1.1-win-x64.zip -Algorithm SHA256
 ```
 
 Compare the reported `Hash` with the value in the Release asset
-`ERCollectionCheckerJP-v0.1.0-win-x64.zip.sha256.txt`.
+`ERCollectionCheckerJP-v0.1.1-win-x64.zip.sha256.txt`.
 
 ## Basic usage
 
@@ -71,9 +71,10 @@ Compare the reported `Hash` with the value in the Release asset
 3. Choose a collection mode.
 4. Select **Analyze**.
 5. Narrow the list with search, status, category, and content filters.
-6. Select a row to copy that item's name in the current display language.
+6. Select the item you want to work with.
+7. Use **Copy name** or `Ctrl+C` to copy the selected item's name in the current display language.
 
-You can also copy the selected name with **Copy name** or `Ctrl+C`. Click a column header to sort the list.
+Selecting a row does not change the clipboard. Click a column header to sort the list.
 
 The standard save location has the following form. `<SteamID>` varies by account and computer.
 
@@ -214,7 +215,7 @@ single-executable win-x64 package, ZIP, and SHA-256 checksum in the release outp
 .\tools\Publish-Release.ps1
 ```
 
-A version can be supplied explicitly, for example `.\tools\Publish-Release.ps1 -Version 0.1.0`.
+A version can be supplied explicitly, for example `.\tools\Publish-Release.ps1 -Version 0.1.1`.
 `SOURCE_COMMIT.txt` records the source commit. `RUNTIME_DATA.txt` records the game version, runtime-file count,
 aggregate SHA-256, .NET SDK, and bundled .NET Runtime version. Raw runtime JSON and game files are not included.
 See the [release procedure](https://github.com/saraefcat/ERCollectionCheckerJP/blob/main/docs/RELEASE.md) for details.

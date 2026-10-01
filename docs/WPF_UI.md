@@ -31,8 +31,9 @@ Phase 5の製品画面は、`SaveAnalysisService`が返すimmutableな解析結�
 - 日本語名・英語名の両方を対象にした検索
 - 状態、カテゴリ、Base Game / SOTE / Tarnished Packの絞り込み
 - 列見出しクリックによる一覧ソート
-- 行選択、`名称をコピー`ボタン、`Ctrl+C`で現在の表示言語のitem名だけをclipboardへコピー。
-  DataGrid標準の複数セルコピーは無効にし、カテゴリやDLC列による上書きを防ぐ
+- 行選択は選択状態の変更だけを行い、clipboardを書き換えない
+- `名称をコピー`ボタンまたは`Ctrl+C`で、選択中itemの現在の表示言語側名称だけをclipboardへコピー
+- DataGrid標準の複数セルコピーは無効にし、カテゴリやDLC列によるclipboard上書きを防ぐ
 - 防具のexact所持と`CoveredByConversion`の区別
 - 開発者モードでのみ、判定メモ列と選択itemの詳細・Param ID・内部keyを表示
 
@@ -54,7 +55,8 @@ DataOnlyを再び非表示にし、状態フィルターを`Missing`へ戻す。
 - Application queryのmode、state、category、content pack、日英検索、DataOnlyのunit test
 - App ViewModelの日英表示、使用中slot列挙、キャラクター名、mode別scope、DataOnlyトグルのunit test
 - 言語切替後もキャラクター・状態・カテゴリのComboBox選択を保持するWPF binding回帰
-- item名clipboardコピーと前回セーブパスのJSON保存・復元テスト
+- 行選択時にclipboardへ書き込まないこと、明示的なitem名コピー、未選択状態、言語切替・フィルター変更時の選択復元テスト
+- 前回セーブパスのJSON保存・復元テスト
 - baseline / all-attiresを同じ製品APIで再評価し、既定件数と読み取り前後SHA-256一致を確認
 
 ## 7. 既知の制限
